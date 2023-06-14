@@ -7,15 +7,23 @@ sudo apt-get -y install libxvidcore-dev libx264-dev
 sudo apt-get -y install qt4-dev-tools
 sudo apt-get -y install libatlas-base-dev
 
-# Need to get an older version of OpenCV because version 4 has errors
-pip3 install -vvv opencv-python==3.4.11.41
+# Ask user for OpenCV version to install
+read -p "Do you want to install OpenCV version 3.4.11.41 (option 1) or the current version (option 2)? Enter 1 or 2: " opencv_option
+if [ "$opencv_option" -eq 1 ]; then
+    pip3 install -vvv opencv-python==3.4.11.41
+elif [ "$opencv_option" -eq 2 ]; then
+    pip3 install -vvv opencv-python
+else
+    echo "Invalid option for OpenCV version"
+    exit 1
+fi
+
 if [ $? -ne 0 ]; then
-    echo "Failed to install opencv-python==3.4.11.41"
+    echo "Failed to install opencv-python"
     exit 1
 fi
 
 # Get packages required for TensorFlow
-
 ARCH=$(uname -m)
 PYTHON_VERSION=$(python3 --version | cut -d' ' -f2 | cut -d'.' -f1-2)
 
@@ -32,9 +40,9 @@ else
 fi
 
 echo "Do you want to install TensorFlow from pip (option 1) or from URL (option 2)?"
-read -p "Enter 1 or 2: " option
+read -p "Enter 1 or 2: " tf_option
 
-if [ "$option" -eq 1 ]; then
+if [ "$tf_option" -eq 1 ]; then
     if [ "$ARCH_SUFFIX" = "aarch64" ]; then
         pip3 install -vvv tensorflow-aarch64
         if [ $? -ne 0 ]; then
@@ -48,7 +56,7 @@ if [ "$option" -eq 1 ]; then
             exit 1
         fi
     fi
-elif [ "$option" -eq 2 ]; then
+elif [ "$tf_option" -eq 2 ]; then
     URL="https://github.com/google-coral/pycoral/releases/download/v2.0.0/tflite_runtime-2.5.0.post1-cp${PYTHON_VERSION//.}-cp${PYTHON_VERSION//.}m-linux_$ARCH_SUFFIX.whl"
     if [ "$PYTHON_VERSION" = "3.9" ] || [ "$PYTHON_VERSION" = "3.8" ]; then
         URL=${URL/m/}
@@ -59,6 +67,6 @@ elif [ "$option" -eq 2 ]; then
         exit 1
     fi
 else
-    echo "Invalid option"
+    echo "Invalid option for TensorFlow installation"
     exit 1
 fi
