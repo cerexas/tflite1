@@ -10,9 +10,9 @@ sudo apt-get -y install libatlas-base-dev
 # Ask user for OpenCV version to install
 read -p "Do you want to install the current version of OpenCV (option 1) or version 3.4.11.41 (option 2)? Enter 1 or 2: " opencv_option
 if [ "$opencv_option" -eq 1 ]; then
-    pip3 install -vvv opencv-python
+    pip3 install -vvv --no-cache-dir opencv-python
 elif [ "$opencv_option" -eq 2 ]; then
-    pip3 install -vvv opencv-python==3.4.11.41
+    pip3 install -vvv --no-cache-dir opencv-python==3.4.11.41
 else
     echo "Invalid option for OpenCV version"
     exit 1
@@ -44,13 +44,13 @@ read -p "Enter 1 or 2: " tf_option
 
 if [ "$tf_option" -eq 1 ]; then
     if [ "$ARCH_SUFFIX" = "aarch64" ]; then
-        pip3 install -vvv tensorflow-aarch64
+        pip3 install -vvv --no-cache-dir tensorflow-aarch64
         if [ $? -ne 0 ]; then
             echo "Failed to install tensorflow-aarch64"
             exit 1
         fi
     elif [ "$ARCH_SUFFIX" = "armv7l" ]; then
-        pip3 install -vvv tensorflow
+        pip3 install -vvv --no-cache-dir tensorflow
         if [ $? -ne 0 ]; then
             echo "Failed to install tensorflow"
             exit 1
@@ -61,7 +61,7 @@ elif [ "$tf_option" -eq 2 ]; then
     if [ "$PYTHON_VERSION" = "3.9" ] || [ "$PYTHON_VERSION" = "3.8" ]; then
         URL=${URL/m/}
     fi
-    pip3 install -vvv $URL
+    pip3 install -vvv --no-cache-dir $URL
     if [ $? -ne 0 ]; then
         echo "Failed to install tflite_runtime from $URL"
         exit 1
