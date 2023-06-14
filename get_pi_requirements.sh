@@ -1,8 +1,6 @@
 #!/bin/bash
 
 # Get packages required for OpenCV
-# libpng12-dev utilgjengelig; byttet med libpng-dev
-
 sudo apt-get -y install libjpeg-dev libtiff5-dev libjasper-dev libpng-dev
 sudo apt-get -y install libavcodec-dev libavformat-dev libswscale-dev libv4l-dev
 sudo apt-get -y install libxvidcore-dev libx264-dev
@@ -10,32 +8,57 @@ sudo apt-get -y install qt4-dev-tools
 sudo apt-get -y install libatlas-base-dev
 
 # Need to get an older version of OpenCV because version 4 has errors
-pip3 install opencv-python==3.4.11.41
+pip3 install -vvv opencv-python==3.4.11.41
+if [ $? -ne 0 ]; then
+    echo "Failed to install opencv-python==3.4.11.41"
+    exit 1
+fi
 
 # Get packages required for TensorFlow
-# Using the tflite_runtime packages available at https://www.tensorflow.org/lite/guide/python
-# Will change to just 'pip3 install tensorflow' once newer versions of TF are added to piwheels
 
-#pip3 install tensorflow
+ARCH=$(uname -m)
+PYTHON_VERSION=$(python3 --version | cut -d' ' -f2 | cut -d'.' -f1-2)
 
-version=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
-
-if [ $version == "3.9" ]; then
-pip3 install https://github.com/google-coral/pycoral/releases/download/v2.0.0/tflite_runtime-2.5.0.post1-cp39-cp39-linux_armv7l.whl
+ARCH_SUFFIX=""
+if [ "$ARCH" = "aarch64" ]; then
+    echo "64-bit detected"
+    ARCH_SUFFIX="aarch64"
+elif [ "$ARCH" = "armv7l" ]; then
+    echo "32-bit detected"
+    ARCH_SUFFIX="armv7l"
+else
+    echo "Unknown architecture"
+    exit 1
 fi
 
-if [ $version == "3.8" ]; then
-pip3 install https://github.com/google-coral/pycoral/releases/download/v2.0.0/tflite_runtime-2.5.0.post1-cp38-cp38-linux_armv7l.whl
-fi
+echo "Do you want to install TensorFlow from pip (option 1) or from URL (option 2)?"
+read -p "Enter 1 or 2: " option
 
-if [ $version == "3.7" ]; then
-pip3 install https://github.com/google-coral/pycoral/releases/download/v2.0.0/tflite_runtime-2.5.0.post1-cp37-cp37m-linux_armv7l.whl
-fi
-
-if [ $version == "3.6" ]; then
-pip3 install https://github.com/google-coral/pycoral/releases/download/v2.0.0/tflite_runtime-2.5.0.post1-cp36-cp36m-linux_armv7l.whl
-fi
-
-if [ $version == "3.5" ]; then
-pip3 install https://github.com/google-coral/pycoral/releases/download/release-frogfish/tflite_runtime-2.5.0-cp35-cp35m-linux_armv7l.whl
+if [ "$option" -eq 1 ]; then
+    if [ "$ARCH_SUFFIX" = "aarch64" ]; then
+        pip3 install -vvv tensorflow-aarch64
+        if [ $? -ne 0 ]; then
+            echo "Failed to install tensorflow-aarch64"
+            exit 1
+        fi
+    elif [ "$ARCH_SUFFIX" = "armv7l" ]; then
+        pip3 install -vvv tensorflow
+        if [ $? -ne 0 ]; then
+            echo "Failed to install tensorflow"
+            exit 1
+        fi
+    fi
+elif [ "$option" -eq 2 ]; then
+    URL="https://github.com/google-coral/pycoral/releases/download/v2.0.0/tflite_runtime-2.5.0.post1-cp${PYTHON_VERSION//.}-cp${PYTHON_VERSION//.}m-linux_$ARCH_SUFFIX.whl"
+    if [ "$PYTHON_VERSION" = "3.9" ] || [ "$PYTHON_VERSION" = "3.8" ]; then
+        URL=${URL/m/}
+    fi
+    pip3 install -vvv $URL
+    if [ $? -ne 0 ]; then
+        echo "Failed to install tflite_runtime from $URL"
+        exit 1
+    fi
+else
+    echo "Invalid option"
+    exit 1
 fi
