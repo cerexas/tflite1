@@ -8,11 +8,11 @@ sudo apt-get -y install qt4-dev-tools
 sudo apt-get -y install libatlas-base-dev
 
 # Ask user for OpenCV version to install
-read -p "Do you want to install OpenCV version 3.4.11.41 (option 1) or the current version (option 2)? Enter 1 or 2: " opencv_option
+read -p "Do you want to install the current version of OpenCV (option 1) or version 3.4.11.41 (option 2)? Enter 1 or 2: " opencv_option
 if [ "$opencv_option" -eq 1 ]; then
-    pip3 install -vvv opencv-python==3.4.11.41
-elif [ "$opencv_option" -eq 2 ]; then
     pip3 install -vvv opencv-python
+elif [ "$opencv_option" -eq 2 ]; then
+    pip3 install -vvv opencv-python==3.4.11.41
 else
     echo "Invalid option for OpenCV version"
     exit 1
